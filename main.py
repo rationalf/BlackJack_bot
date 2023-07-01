@@ -21,7 +21,7 @@ def add_dictionary_to_json(key):
     return 5000
 
 
-def win(id_of_user):
+def winner(id_of_user):
     telegram_bot.send_message(id_of_user, "You Win!",
                               parse_mode='html')
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -290,7 +290,7 @@ def get_user_text(message):
             telegram_bot.send_message(message.chat.id, "=========================")
             telegram_bot.send_message(message.chat.id, f'<b>Croupier final sum is - </b> {croupier_sum}',
                                       parse_mode='html')
-            win(message.chat.id)
+            winner(message.chat.id)
         elif sum_of_cards > 21:
             telegram_bot.send_message(message.chat.id, f'<b>Your final sum is - </b> {sum_of_cards}',
                                       parse_mode='html')
@@ -323,9 +323,9 @@ def get_user_text(message):
         telegram_bot.send_message(message.chat.id, f'<b>Your final sum is - </b> {sum_of_cards}',
                                   parse_mode='html')
         if croupier_sum > 21 >= sum_of_cards:
-            win(message.chat.id)
+            winner(message.chat.id)
         elif 21 >= sum_of_cards > croupier_sum:
-            win(message.chat.id)
+            winner(message.chat.id)
         elif sum_of_cards == croupier_sum:
             draw(message.chat.id)
         else:
