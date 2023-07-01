@@ -182,7 +182,7 @@ def website(message):
     """command for showing all commands"""
     telegram_bot.send_message(message.chat.id, 'All available commands:'
                                                '\n /start - for starting the bot'
-                                               '\n /commands - for watching all the commands'
+                                               '\n /help - for watching all the commands'
                                                '\n /play - for starting the game'
                                                '\n /rules - for reading the rules of the game',
                               parse_mode='html')
@@ -216,6 +216,26 @@ def play(message):
     deck_index = 0
 
 
+def give_user_card():
+    global index_of_card, cards_on_hands, cards_on_croupier, index_of_croupier_card, deck_index
+    cards_on_hands.append(deck.cards[deck_index])
+    deck_index += 1
+    rank = cards_on_hands[index_of_card].rank
+    suit = cards_on_hands[index_of_card].suit
+    card = view_of_card(rank, suit)
+    index_of_card += 1
+    return card
+
+def give_croupier_card():
+    global index_of_card, cards_on_hands, cards_on_croupier, index_of_croupier_card, deck_index
+    cards_on_croupier.append(deck.cards[deck_index])
+    deck_index += 1
+    croupier_rank = cards_on_croupier[index_of_croupier_card].rank
+    croupier_suit = cards_on_croupier[index_of_croupier_card].suit
+    croupier_card = view_of_card(croupier_rank, croupier_suit)
+    index_of_croupier_card += 1
+    return croupier_card
+
 @telegram_bot.message_handler()
 def get_user_text(message):
     """command for handling the user's text"""
@@ -224,66 +244,45 @@ def get_user_text(message):
 
         """taking one more card if it is possible"""
         if len(cards_on_hands) == 0:
-            cards_on_hands.append(deck.cards[deck_index])
-            deck_index += 1
-            rank = cards_on_hands[index_of_card].rank
-            suit = cards_on_hands[index_of_card].suit
-            card = view_of_card(rank, suit)
+            card = give_user_card()
             telegram_bot.send_message(message.chat.id, "Your first card is " + card)
-            index_of_card += 1
-            cards_on_hands.append(deck.cards[deck_index])
-            deck_index += 1
-            rank = cards_on_hands[index_of_card].rank
-            suit = cards_on_hands[index_of_card].suit
-            card = view_of_card(rank, suit)
+
+            card = give_user_card()
             telegram_bot.send_message(message.chat.id, "Your second card is " + card)
-            index_of_card += 1
             telegram_bot.send_message(message.chat.id, "=========================")
-            cards_on_croupier.append(deck.cards[deck_index])
-            deck_index += 1
-            croupier_rank = cards_on_croupier[index_of_croupier_card].rank
-            croupier_suit = cards_on_croupier[index_of_croupier_card].suit
-            croupier_card = view_of_card(croupier_rank, croupier_suit)
+
+            croupier_card = give_croupier_card()
             telegram_bot.send_message(message.chat.id, "Croupier first card is " + croupier_card)
-            index_of_croupier_card += 1
-            cards_on_croupier.append(deck.cards[deck_index])
-            deck_index += 1
-            croupier_rank = cards_on_croupier[index_of_croupier_card].rank
-            croupier_suit = cards_on_croupier[index_of_croupier_card].suit
-            croupier_card = view_of_card(croupier_rank, croupier_suit)
+
+            croupier_card = give_croupier_card()
             telegram_bot.send_message(message.chat.id, "Croupier second card is " + croupier_card)
-            index_of_croupier_card += 1
+
             croupier_sum = counting_sum(cards_on_croupier)
             if croupier_sum == 21:
                 telegram_bot.send_message(message.chat.id, "=========================")
                 blackjack_for_croupier(message.chat.id)
+
             sum_of_card = counting_sum(cards_on_hands)
             if sum_of_card == 21:
                 telegram_bot.send_message(message.chat.id, "=========================")
                 blackjack(message.chat.id)
         else:
-            cards_on_hands.append(deck.cards[deck_index])
-            rank = cards_on_hands[index_of_card].rank
-            suit = cards_on_hands[index_of_card].suit
-            card = view_of_card(rank, suit)
+            card = give_user_card()
             telegram_bot.send_message(message.chat.id, "Your next card is - " + card)
-            index_of_card += 1
-            deck_index += 1
+
             croupier_sum = counting_sum(cards_on_croupier)
             if croupier_sum <= 14:
-                cards_on_croupier.append(deck.cards[deck_index])
-                deck_index += 1
-                croupier_rank = cards_on_croupier[index_of_croupier_card].rank
-                croupier_suit = cards_on_croupier[index_of_croupier_card].suit
-                croupier_card = view_of_card(croupier_rank, croupier_suit)
+
+                croupier_card = give_croupier_card()
                 telegram_bot.send_message(message.chat.id, "=========================")
                 telegram_bot.send_message(message.chat.id, "Croupier next card is " + croupier_card)
-                index_of_croupier_card += 1
+
             else:
                 telegram_bot.send_message(message.chat.id, "=========================")
                 telegram_bot.send_message(message.chat.id, "Croupier don't take a card ")
         croupier_sum = counting_sum(cards_on_croupier)
         sum_of_cards = counting_sum(cards_on_hands)
+
         if croupier_sum > 21:
             telegram_bot.send_message(message.chat.id, f'<b>Your final sum is - </b> {sum_of_cards}',
                                       parse_mode='html')
@@ -301,14 +300,11 @@ def get_user_text(message):
     elif message.text == "Stand":
         croupier_sum = counting_sum(cards_on_croupier)
         if croupier_sum <= 14:
-            cards_on_croupier.append(deck.cards[deck_index])
-            deck_index += 1
-            croupier_rank = cards_on_croupier[index_of_croupier_card].rank
-            croupier_suit = cards_on_croupier[index_of_croupier_card].suit
-            croupier_card = view_of_card(croupier_rank, croupier_suit)
+
+            croupier_card = give_croupier_card()
             telegram_bot.send_message(message.chat.id, "=========================")
             telegram_bot.send_message(message.chat.id, "Croupier next card is " + croupier_card)
-            index_of_croupier_card += 1
+
         else:
             telegram_bot.send_message(message.chat.id, "=========================")
             telegram_bot.send_message(message.chat.id, "Croupier don't take a card ")
