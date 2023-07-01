@@ -6,59 +6,44 @@ from telebot import types
 telegram_bot = telebot.TeleBot('6071571860:AAFch9-DHyN7EZ8zZUQRk5aM50u-ZD05cgs')
 
 
-def winner(id_of_user):
-    telegram_bot.send_message(id_of_user, "You Win!",
-                              parse_mode='html')
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-    stop_button = types.KeyboardButton('Stop playing')
-    restart_button = types.KeyboardButton('Start another game')
-    markup.add(stop_button, restart_button)
-    telegram_bot.send_message(id_of_user, "To restart game, press the button",
-                              reply_markup=markup)
+class ResultOfGame:
+    def winner(self, id_of_user):
+        telegram_bot.send_message(id_of_user, "=========================")
+        telegram_bot.send_message(id_of_user, "You Win!",
+                                  parse_mode='html')
+        self.resize_keyboard(id_of_user)
 
+    def loser(self, id_of_user):
+        telegram_bot.send_message(id_of_user, "=========================")
+        telegram_bot.send_message(id_of_user, f'<b>You Lose!</b>',
+                                  parse_mode='html')
+        self.resize_keyboard(id_of_user)
 
-def loser(id_of_user):
-    telegram_bot.send_message(id_of_user, f'<b>You Lose!</b>',
-                              parse_mode='html')
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-    stop_button = types.KeyboardButton('Stop playing')
-    restart_button = types.KeyboardButton('Start another game')
-    markup.add(stop_button, restart_button)
-    telegram_bot.send_message(id_of_user, "To restart game, press the button",
-                              reply_markup=markup)
+    def draw(self, id_of_user):
+        telegram_bot.send_message(id_of_user, "=========================")
+        telegram_bot.send_message(id_of_user, f'<b>It is a draw!</b>',
+                                  parse_mode='html')
+        self.resize_keyboard(id_of_user)
 
+    def blackjack(self, id_of_user):
+        telegram_bot.send_message(id_of_user, "=========================")
+        telegram_bot.send_message(id_of_user, f'<b>You Win! You have a Blackjack</b>',
+                                  parse_mode='html')
+        self.resize_keyboard(id_of_user)
 
-def draw(id_of_user):
-    telegram_bot.send_message(id_of_user, f'<b>It is a draw!</b>',
-                              parse_mode='html')
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-    stop_button = types.KeyboardButton('Stop playing')
-    restart_button = types.KeyboardButton('Start another game')
-    markup.add(stop_button, restart_button)
-    telegram_bot.send_message(id_of_user, "To restart game, press the button",
-                              reply_markup=markup)
+    def blackjack_for_croupier(self, id_of_user):
+        telegram_bot.send_message(id_of_user, "=========================")
+        telegram_bot.send_message(id_of_user, f'<b>You Lose! Croupier has a Blackjack</b>',
+                                  parse_mode='html')
+        self.resize_keyboard(id_of_user)
 
-
-def blackjack(id_of_user):
-    telegram_bot.send_message(id_of_user, f'<b>You Win! You have a Blackjack</b>',
-                              parse_mode='html')
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-    stop_button = types.KeyboardButton('Stop playing')
-    restart_button = types.KeyboardButton('Start another game')
-    markup.add(stop_button, restart_button)
-    telegram_bot.send_message(id_of_user, "To restart game, press the button",
-                              reply_markup=markup)
-
-
-def blackjack_for_croupier(id_of_user):
-    telegram_bot.send_message(id_of_user, f'<b>You Lose! Croupier has a Blackjack</b>',
-                              parse_mode='html')
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-    stop_button = types.KeyboardButton('Stop playing')
-    restart_button = types.KeyboardButton('Start another game')
-    markup.add(stop_button, restart_button)
-    telegram_bot.send_message(id_of_user, "To restart game, press the button",
-                              reply_markup=markup)
+    def resize_keyboard(self, id_of_user):
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+        stop_button = types.KeyboardButton('Stop playing')
+        restart_button = types.KeyboardButton('Start another game')
+        markup.add(stop_button, restart_button)
+        telegram_bot.send_message(id_of_user, "To restart game, press the button",
+                                  reply_markup=markup)
 
 
 def view_of_card(rank, suit):
@@ -258,6 +243,8 @@ def get_user_text(message):
     player = deck.get_player(message.from_user.id)
     croupier = deck.get_player(0)
 
+    result_of_game = ResultOfGame()
+
     if message.text == "Hit":
 
         """taking one more card if it is possible"""
@@ -276,13 +263,11 @@ def get_user_text(message):
 
             croupier_sum = croupier.counting_sum()
             if croupier_sum == 21:
-                telegram_bot.send_message(message.chat.id, "=========================")
-                blackjack_for_croupier(message.chat.id)
+                result_of_game.blackjack_for_croupier(message.chat.id)
 
             player_sum = player.counting_sum()
             if player_sum == 21:
-                telegram_bot.send_message(message.chat.id, "=========================")
-                blackjack(message.chat.id)
+                result_of_game.blackjack(message.chat.id)
         else:
             player_card = deck.give_user_card(player)
             telegram_bot.send_message(message.chat.id, "Your next card is - " + player_card)
@@ -299,36 +284,40 @@ def get_user_text(message):
             telegram_bot.send_message(message.chat.id, "=========================")
             telegram_bot.send_message(message.chat.id, f'<b>Croupier final sum is - </b> {croupier_sum}',
                                       parse_mode='html')
-            loser(message.chat.id)
+            result_of_game.loser(message.chat.id)
         elif croupier_sum > 21:
             telegram_bot.send_message(message.chat.id, f'<b>Your final sum is - </b> {player_sum}',
                                       parse_mode='html')
             telegram_bot.send_message(message.chat.id, "=========================")
             telegram_bot.send_message(message.chat.id, f'<b>Croupier final sum is - </b> {croupier_sum}',
                                       parse_mode='html')
-            winner(message.chat.id)
+            result_of_game.winner(message.chat.id)
 
     elif message.text == "Stand":
         croupier_sum = croupier.counting_sum()
-        croupier.croupier_choice(croupier_sum, message)
+        while croupier_sum <= 16:
+            croupier.croupier_choice(croupier_sum, message)
+            croupier_sum = croupier.counting_sum()
+
+        telegram_bot.send_message(message.chat.id, "=========================")
 
         player_sum = player.counting_sum()
         croupier_sum = croupier.counting_sum()
 
-        telegram_bot.send_message(message.chat.id, f'<b>Croupier final sum is - </b> {croupier_sum}',
-                                  parse_mode='html')
-        telegram_bot.send_message(message.chat.id, "=========================")
         telegram_bot.send_message(message.chat.id, f'<b>Your final sum is - </b> {player_sum}',
                                   parse_mode='html')
 
+        telegram_bot.send_message(message.chat.id, "=========================")
+        telegram_bot.send_message(message.chat.id, f'<b>Croupier final sum is - </b> {croupier_sum}',
+                                  parse_mode='html')
         if croupier_sum > 21 >= player_sum:
-            winner(message.chat.id)
+            result_of_game.winner(message.chat.id)
         elif 21 >= player_sum > croupier_sum:
-            winner(message.chat.id)
+            result_of_game.winner(message.chat.id)
         elif player_sum == croupier_sum:
-            draw(message.chat.id)
+            result_of_game.draw(message.chat.id)
         else:
-            loser(message.chat.id)
+            result_of_game.loser(message.chat.id)
     elif message.text == 'Start another game' or message.text == 'Start':
 
         """restarting the game"""
