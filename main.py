@@ -76,11 +76,11 @@ def view_of_card(rank, suit):
 class Player:
 
     def __init__(self, id):
-        global deck
+        global list_of_players
         self.id = id
         self.cards_on_hands = []
         self.index_of_card = 0
-        deck.list_of_players.append(self)
+        list_of_players.append(self)
 
     def counting_sum(self):
         summ = 0
@@ -99,7 +99,7 @@ class Player:
 
     def croupier_choice(self, croupier_sum, message):
         global deck
-        if self.id == 0:
+        if self.id == str(message.from_user.id) + message.from_user.username:
             if croupier_sum <= 16:
                 croupier_card = deck.give_user_card(self)
                 telegram_bot.send_message(message.chat.id, "=========================")
@@ -126,7 +126,6 @@ class Deck:
     def __init__(self):
         self.cards = []
         self.index = 0
-        self.list_of_players = []
         ranks = {i for i in range(2, 15)}
         suits = ['Clubs', 'Hearts', 'Spades', 'Diamonds']
         for rank in ranks:
@@ -148,14 +147,23 @@ class Deck:
         user.index_of_card += 1
         return card
 
-    def get_player(self, ID):
-        for player in self.list_of_players:
-            if player.id == ID:
-                return player
-        return None
-
 
 deck = Deck()
+list_of_players = []
+
+
+def get_player(ID):
+    for player in list_of_players:
+        if player.id == ID:
+            print(player.id)
+            return player
+    print("ERROR")
+
+
+def delete_player(ID):
+    for player in list_of_players:
+        if player.id == ID:
+            list_of_players.remove(player)
 
 
 @telegram_bot.message_handler(commands=['start'])
@@ -216,11 +224,15 @@ def play(message):
     markup.add(hit_button, stand_button)
     telegram_bot.send_message(message.chat.id, "Have a look at available buttons:", reply_markup=markup)
 
-    global deck
+    global deck, list_of_players
     del deck
     deck = Deck()
+    delete_player(message.from_user.id)
+    delete_player(str(message.from_user.id) + message.from_user.username)
+
     Player(message.from_user.id)
-    Player(0)
+    Player(str(message.from_user.id) + message.from_user.username)
+    print(list_of_players)
     deck.shuffle()
     deck.index = 0
 
@@ -229,8 +241,8 @@ def play(message):
 def get_user_text(message):
     """command for handling the user's text"""
     global deck
-    player = deck.get_player(message.from_user.id)
-    croupier = deck.get_player(0)
+    player = get_player(message.from_user.id)
+    croupier = get_player(str(message.from_user.id) + message.from_user.username)
 
     result_of_game = ResultOfGame()
 
