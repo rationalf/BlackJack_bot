@@ -47,40 +47,29 @@ class ResultOfGame:
 
 
 def view_of_card(rank, suit):
-    if rank == 2:
-        rank = "2️⃣"
-    elif rank == 3:
-        rank = "3️⃣"
-    elif rank == 4:
-        rank = "4️⃣"
-    elif rank == 5:
-        rank = "5️⃣"
-    elif rank == 6:
-        rank = "6️⃣"
-    elif rank == 7:
-        rank = "7️⃣"
-    elif rank == 8:
-        rank = "8️⃣"
-    elif rank == 9:
-        rank = "9️⃣"
-    elif rank == 10:
-        rank = "🔟"
-    elif rank == 11:
-        rank = "🅹"
-    elif rank == 12:
-        rank = "🆀"
-    elif rank == 13:
-        rank = "🅺"
-    else:
-        rank = "🅰"
-    if suit == 'Clubs':
-        suit_with_emoji = "\U00002663"
-    elif suit == 'Hearts':
-        suit_with_emoji = "\U00002665"
-    elif suit == 'Spades':
-        suit_with_emoji = "\U00002660"
-    else:
-        suit_with_emoji = "\U00002666"
+    rank_emojis = {
+        2: "2️⃣",
+        3: "3️⃣",
+        4: "4️⃣",
+        5: "5️⃣",
+        6: "6️⃣",
+        7: "7️⃣",
+        8: "8️⃣",
+        9: "9️⃣",
+        10: "🔟",
+        11: "🅹",
+        12: "🆀",
+        13: "🅺",
+        14: "🅰"
+    }
+    suit_emojis = {
+        'Clubs': "\U00002663",
+        'Hearts': "\U00002665",
+        'Spades': "\U00002660",
+        'Diamonds': "\U00002666"
+    }
+    rank = rank_emojis.get(rank)
+    suit_with_emoji = suit_emojis.get(suit)
     return rank + " " + suit_with_emoji
 
 
