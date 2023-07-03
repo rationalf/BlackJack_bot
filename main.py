@@ -78,6 +78,7 @@ class Player:
     def __init__(self, id):
         global list_of_players
         self.id = id
+        self.currency = self.get_currency_from_json()
         self.cards_on_hands = []
         self.index_of_card = 0
         list_of_players.append(self)
@@ -109,6 +110,24 @@ class Player:
                 telegram_bot.send_message(message.chat.id, "=========================")
                 telegram_bot.send_message(message.chat.id, "Croupier don't take a card ")
 
+    def get_currency_from_json(self):
+        with open('data.json', 'r') as file:
+            data = json.load(file)
+        file.close()
+        if data.keys().__contains__(str(self.id)):
+            return data.get(str(self.id))
+        return 0
+
+    def set_currency_for_player(self):
+        with open('data.json', 'r') as file:
+            data = json.load(file)
+        file.close()
+        if data.keys().__contains__(str(self.id)):
+            data[str(self.id)] = self.currency
+        with open('data.json', 'w') as file:
+            json.dump(data, file, indent=4)
+        file.close()
+
 
 class Card:
     """class that represents the playing card"""
@@ -126,7 +145,7 @@ class Deck:
     def __init__(self):
         self.cards = []
         self.index = 0
-        ranks = {i for i in range(2, 15)}
+        ranks = [i for i in range(2, 15)] * 4
         suits = ['Clubs', 'Hearts', 'Spades', 'Diamonds']
         for rank in ranks:
             for suit in suits:
@@ -178,6 +197,7 @@ def start(message):
                 data = json.load(file)
         except FileNotFoundError:
             data = {}
+        file.close()
         if data.keys().__contains__(str(key)):
             print(f"Skipping duplicate entry for key: {key}")
             return data.get(str(key))
@@ -186,6 +206,7 @@ def start(message):
         data[key] = 5000
         with open('data.json', 'w') as file:
             json.dump(data, file, indent=4)
+        file.close()
         return 5000
 
     user_name = message.from_user.username
@@ -243,9 +264,7 @@ def get_user_text(message):
     global deck
     player = get_player(message.from_user.id)
     croupier = get_player(str(message.from_user.id) + message.from_user.username)
-
     result_of_game = ResultOfGame()
-
     if message.text == "Hit":
 
         """taking one more card if it is possible"""
