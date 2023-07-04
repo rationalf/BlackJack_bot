@@ -238,13 +238,6 @@ def rules(message):
 
 @telegram_bot.message_handler(commands=['play'])
 def play(message):
-    """command for starting playing the game"""
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    hit_button = types.KeyboardButton('Hit')
-    stand_button = types.KeyboardButton('Stand')
-    markup.add(hit_button, stand_button)
-    telegram_bot.send_message(message.chat.id, "Have a look at available buttons:", reply_markup=markup)
-
     global deck, list_of_players
     del deck
     deck = Deck()
@@ -257,6 +250,14 @@ def play(message):
     deck.shuffle()
     deck.index = 0
 
+    """command for starting playing the game"""
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    hit_button = types.KeyboardButton('Hit')
+    stand_button = types.KeyboardButton('Stand')
+    balance_button = types.InlineKeyboardButton('Your balance - ' + str(get_player(message.from_user.id).currency))
+    markup.add(hit_button, stand_button, balance_button)
+    telegram_bot.send_message(message.chat.id, "Have a look at available buttons:", reply_markup=markup)
+
 
 @telegram_bot.message_handler()
 def get_user_text(message):
@@ -265,6 +266,10 @@ def get_user_text(message):
     player = get_player(message.from_user.id)
     croupier = get_player(str(message.from_user.id) + message.from_user.username)
     result_of_game = ResultOfGame()
+    print(player.currency)
+    if player.currency < 50:
+        telegram_bot.send_message(message.chat.id, "Your money lower than minimum bet")
+        return
     if message.text == "Hit":
 
         """taking one more card if it is possible"""
@@ -318,7 +323,6 @@ def get_user_text(message):
         while croupier_sum <= 16:
             croupier.croupier_choice(croupier_sum, message)
             croupier_sum = croupier.counting_sum()
-
         telegram_bot.send_message(message.chat.id, "=========================")
 
         player_sum = player.counting_sum()
@@ -350,6 +354,8 @@ def get_user_text(message):
         markup.add(start_button)
         telegram_bot.send_message(message.chat.id, "To start playing, press the button",
                                   reply_markup=markup)
+    elif message.text == 'Your balance - ' + str(get_player(message.from_user.id).currency):
+        telegram_bot.send_message(message.chat.id, "5000 chips - 100 rubles\n for getting send money here - ...")
 
 
 telegram_bot.polling(none_stop=True)
