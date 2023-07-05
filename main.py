@@ -11,39 +11,47 @@ class ResultOfGame:
         telegram_bot.send_message(id_of_user, "=========================")
         telegram_bot.send_message(id_of_user, "You Win!",
                                   parse_mode='html')
-        self.resize_keyboard(id_of_user)
+        resize_keyboard(id_of_user)
+        get_player(id_of_user).set_currency_for_player()
+
 
     def loser(self, id_of_user):
         telegram_bot.send_message(id_of_user, "=========================")
         telegram_bot.send_message(id_of_user, f'<b>You Lose!</b>',
                                   parse_mode='html')
-        self.resize_keyboard(id_of_user)
+        resize_keyboard(id_of_user)
+        get_player(id_of_user).set_currency_for_player()
 
     def draw(self, id_of_user):
         telegram_bot.send_message(id_of_user, "=========================")
         telegram_bot.send_message(id_of_user, f'<b>It is a draw!</b>',
                                   parse_mode='html')
-        self.resize_keyboard(id_of_user)
+        resize_keyboard(id_of_user)
+        get_player(id_of_user).set_currency_for_player()
 
     def blackjack(self, id_of_user):
         telegram_bot.send_message(id_of_user, "=========================")
         telegram_bot.send_message(id_of_user, f'<b>You Win! You have a Blackjack</b>',
                                   parse_mode='html')
-        self.resize_keyboard(id_of_user)
+        resize_keyboard(id_of_user)
+        get_player(id_of_user).set_currency_for_player()
 
     def blackjack_for_croupier(self, id_of_user):
         telegram_bot.send_message(id_of_user, "=========================")
         telegram_bot.send_message(id_of_user, f'<b>You Lose! Croupier has a Blackjack</b>',
                                   parse_mode='html')
-        self.resize_keyboard(id_of_user)
+        resize_keyboard(id_of_user)
+        get_player(id_of_user).set_currency_for_player()
 
-    def resize_keyboard(self, id_of_user):
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-        stop_button = types.KeyboardButton('Stop playing')
-        restart_button = types.KeyboardButton('Start another game')
-        markup.add(stop_button, restart_button)
-        telegram_bot.send_message(id_of_user, "To restart game, press the button",
-                                  reply_markup=markup)
+
+def resize_keyboard(id_of_user):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    stop_button = types.KeyboardButton('Stop playing')
+    restart_button = types.KeyboardButton('Start another game')
+    balance_button = types.InlineKeyboardButton('Your balance - ' + str(get_player(id_of_user).currency))
+    markup.add(restart_button, stop_button, balance_button)
+    telegram_bot.send_message(id_of_user, "To restart game, press the button",
+                              reply_markup=markup)
 
 
 def view_of_card(rank, suit):
@@ -75,9 +83,9 @@ def view_of_card(rank, suit):
 
 class Player:
 
-    def __init__(self, id):
+    def __init__(self, user_id):
         global list_of_players
-        self.id = id
+        self.id = user_id
         self.currency = self.get_currency_from_json()
         self.cards_on_hands = []
         self.index_of_card = 0
@@ -249,15 +257,8 @@ def play(message):
     print(list_of_players)
     deck.shuffle()
     deck.index = 0
-
-    """command for starting playing the game"""
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    hit_button = types.KeyboardButton('Hit')
-    stand_button = types.KeyboardButton('Stand')
-    balance_button = types.InlineKeyboardButton('Your balance - ' + str(get_player(message.from_user.id).currency))
-    markup.add(hit_button, stand_button, balance_button)
-    telegram_bot.send_message(message.chat.id, "Have a look at available buttons:", reply_markup=markup)
-
+    telegram_bot.send_message(message.chat.id, "Enter your bet:")
+    telegram_bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAAEJmxFkpePnsFLZl_STLAQga5CoLDr4IQAC7T4AApzT2UneXEXb-Tyadi8E')
 
 @telegram_bot.message_handler()
 def get_user_text(message):
@@ -268,82 +269,46 @@ def get_user_text(message):
     result_of_game = ResultOfGame()
     print(player.currency)
     if player.currency < 50:
-        telegram_bot.send_message(message.chat.id, "Your money lower than minimum bet")
+        telegram_bot.send_message(message.chat.id, "Your currency is lower than minimum bet")
         return
     if message.text == "Hit":
-
-        """taking one more card if it is possible"""
-        if len(player.cards_on_hands) == 0:
-            player_card = deck.give_user_card(player)
-            telegram_bot.send_message(message.chat.id, "Your first card is " + player_card)
-            player_card = deck.give_user_card(player)
-            telegram_bot.send_message(message.chat.id, "Your second card is " + player_card)
-
-            telegram_bot.send_message(message.chat.id, "=========================")
-
-            croupier_card = deck.give_user_card(croupier)
-            telegram_bot.send_message(message.chat.id, "Croupier first card is " + croupier_card)
-            croupier_card = deck.give_user_card(croupier)
-            telegram_bot.send_message(message.chat.id, "Croupier second card is " + croupier_card)
-
-            croupier_sum = croupier.counting_sum()
-            if croupier_sum == 21:
-                result_of_game.blackjack_for_croupier(message.chat.id)
-
-            player_sum = player.counting_sum()
-            if player_sum == 21:
-                result_of_game.blackjack(message.chat.id)
-        else:
-            player_card = deck.give_user_card(player)
-            telegram_bot.send_message(message.chat.id, "Your next card is - " + player_card)
-
-            croupier_sum = croupier.counting_sum()
-            croupier.croupier_choice(croupier_sum, message)
-
-        croupier_sum = croupier.counting_sum()
+        player_card = deck.give_user_card(player)
+        telegram_bot.send_message(message.chat.id, "Your next card is - " + player_card)
         player_sum = player.counting_sum()
 
         if player_sum > 21:
             telegram_bot.send_message(message.chat.id, f'<b>Your final sum is - </b> {player_sum}',
                                       parse_mode='html')
-            telegram_bot.send_message(message.chat.id, "=========================")
-            telegram_bot.send_message(message.chat.id, f'<b>Croupier final sum is - </b> {croupier_sum}',
-                                      parse_mode='html')
             result_of_game.loser(message.chat.id)
-        elif croupier_sum > 21:
-            telegram_bot.send_message(message.chat.id, f'<b>Your final sum is - </b> {player_sum}',
-                                      parse_mode='html')
-            telegram_bot.send_message(message.chat.id, "=========================")
-            telegram_bot.send_message(message.chat.id, f'<b>Croupier final sum is - </b> {croupier_sum}',
-                                      parse_mode='html')
-            result_of_game.winner(message.chat.id)
 
     elif message.text == "Stand":
+        player_sum = player.counting_sum()
         croupier_sum = croupier.counting_sum()
         while croupier_sum <= 16:
             croupier.croupier_choice(croupier_sum, message)
             croupier_sum = croupier.counting_sum()
-        telegram_bot.send_message(message.chat.id, "=========================")
 
-        player_sum = player.counting_sum()
-        croupier_sum = croupier.counting_sum()
+        telegram_bot.send_message(message.chat.id, "=========================")
+        if croupier_sum == 21 and len(croupier.cards_on_hands) == 2:
+            telegram_bot.send_message(message.chat.id, f'<b>Your final sum is - </b> {player_sum}',
+                                      parse_mode='html')
+            result_of_game.blackjack_for_croupier(message.chat.id)
 
         telegram_bot.send_message(message.chat.id, f'<b>Your final sum is - </b> {player_sum}',
                                   parse_mode='html')
-
-        telegram_bot.send_message(message.chat.id, "=========================")
         telegram_bot.send_message(message.chat.id, f'<b>Croupier final sum is - </b> {croupier_sum}',
                                   parse_mode='html')
-        if croupier_sum > 21 >= player_sum:
-            result_of_game.winner(message.chat.id)
-        elif 21 >= player_sum > croupier_sum:
+
+        if croupier_sum > 21 >= player_sum or 21 >= player_sum > croupier_sum:
+            player.currency += player.bet*2
             result_of_game.winner(message.chat.id)
         elif player_sum == croupier_sum:
+            player.currency += player.bet
             result_of_game.draw(message.chat.id)
         else:
             result_of_game.loser(message.chat.id)
-    elif message.text == 'Start another game' or message.text == 'Start':
 
+    elif message.text == 'Start another game' or message.text == 'Start':
         """restarting the game"""
         play(message)
     elif message.text == 'Stop playing':
@@ -355,7 +320,40 @@ def get_user_text(message):
         telegram_bot.send_message(message.chat.id, "To start playing, press the button",
                                   reply_markup=markup)
     elif message.text == 'Your balance - ' + str(get_player(message.from_user.id).currency):
-        telegram_bot.send_message(message.chat.id, "5000 chips - 100 rubles\n for getting send money here - ...")
+        telegram_bot.send_message(message.chat.id,
+                                  "5000 chips - 100 rubles\n for getting free chips give us A's for the PP course :)")
+    elif message.text.isdigit():
+        player.bet = int(message.text)
+        player.currency -= player.bet
+
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+        hit_button = types.KeyboardButton('Hit')
+        stand_button = types.KeyboardButton('Stand')
+        balance_button = types.InlineKeyboardButton('Your balance - ' + str(get_player(message.from_user.id).currency))
+        markup.add(hit_button, stand_button, balance_button)
+        telegram_bot.send_message(message.chat.id, "Your bet is accepted", reply_markup=markup)
+        telegram_bot.send_message(message.chat.id, "=========================")
+        player_card = deck.give_user_card(player)
+        telegram_bot.send_message(message.chat.id, "Your first card is " + player_card)
+        player_card = deck.give_user_card(player)
+        telegram_bot.send_message(message.chat.id, "Your second card is " + player_card)
+        telegram_bot.send_message(message.chat.id, "=========================")
+        croupier_card = deck.give_user_card(croupier)
+        telegram_bot.send_message(message.chat.id, "Croupier first card is " + croupier_card)
+
+        player_sum = player.counting_sum()
+        if player_sum == 21:
+            croupier_sum = croupier.counting_sum()
+            croupier.croupier_choice(croupier_sum, message)
+            if croupier_sum == 21:
+                player.currency += player.bet
+                result_of_game.draw(message.chat.id)
+            else:
+                player.currency += (player.bet * 15)//10
+                result_of_game.blackjack(message.chat.id)
+
+    else:
+        telegram_bot.send_message(message.chat.id, "Bet must be a number")
 
 
 telegram_bot.polling(none_stop=True)
