@@ -262,12 +262,10 @@ deck = Deck()
 list_of_players = []
 
 
-def get_player(ID):
+def get_player(id_of_user):
     for player in list_of_players:
-        if player.id == ID:
-            print(player.id)
+        if player.id == id_of_user:
             return player
-    print("ERROR")
 
 
 def delete_player(ID):
@@ -290,10 +288,7 @@ def start(message):
             data = {}
         file.close()
         if data.keys().__contains__(str(key)):
-            print(f"Skipping duplicate entry for key: {key}")
             return data.get(str(key))
-        print(data)
-        print(key)
         data[key] = 5000
         with open('data.json', 'w') as file:
             json.dump(data, file, indent=4)
@@ -303,7 +298,7 @@ def start(message):
     user_name = message.from_user.username
     telegram_bot.send_message(message.chat.id, f'<b>Hi</b> {user_name}', parse_mode='html')
     website(message)
-    print(add_dictionary_to_json())
+    add_dictionary_to_json()
 
 
 @telegram_bot.message_handler(commands=['help'])
@@ -335,13 +330,15 @@ def play(message):
     delete_player(message.from_user.id)
     delete_player(str(message.from_user.id) + message.from_user.username)
 
-    Player(message.from_user.id)
+    player = Player(message.from_user.id)
+    player.currency = player.get_currency_from_json()
     Player(str(message.from_user.id) + message.from_user.username)
-    print(list_of_players)
     deck.shuffle()
     deck.index = 0
     if get_player(message.from_user.id).currency < 50:
-        telegram_bot.send_message(message.chat.id, "Your currency is lower than minimum bet")
+        telegram_bot.send_message(message.chat.id, "Your balance is lower than minimum bet")
+        message.text = 'Your balance - ' + str(get_player(message.from_user.id).currency)
+        get_user_text(message)
         return
     telegram_bot.send_message(message.chat.id, "Enter your bet:")
 
@@ -353,7 +350,6 @@ def get_user_text(message):
     player = get_player(message.from_user.id)
     croupier = get_player(str(message.from_user.id) + message.from_user.username)
     result_of_game = ResultOfGame()
-    print(player.currency)
     if message.text == "Hit":
         player_card = deck.give_user_card(player)
         telegram_bot.send_message(message.chat.id, "Your next card is:")
@@ -401,13 +397,27 @@ def get_user_text(message):
         markup.add(start_button)
         telegram_bot.send_message(message.chat.id, "To start playing, press the button",
                                   reply_markup=markup)
+        get_player(player.id).set_currency_for_player()
     elif message.text == 'Your balance - ' + str(get_player(message.from_user.id).currency):
         telegram_bot.send_message(message.chat.id,
-                                  "5000 chips - 100 rubles\nFor getting free chips give us A's for the PP course :)")
+                                  "5000 chips - 100 rubles\n"
+                                  "10000 chips - 175 rubles\n"
+                                  "50000 chips - 750 rubles\n"
+                                  "\n"
+                                  "To send money contact us on telegram:\n"
+                                  "@GaaanG_Hooold_oooN\n"
+                                  "@Sergey_Dzyuba\n"
+                                  "\nTo get 1 000 000 chips for free, give us A's for the PP course :)")
     elif message.text.isdigit():
         player.bet = int(message.text)
+
         if player.bet < 50:
-            telegram_bot.send_message(message.chat.id, "Your bet is not accepted!\nMinimum value of bet - 50")
+            telegram_bot.send_message(message.chat.id, "Your bet is NOT accepted!\nMinimum value of bet - 50!")
+            return play(message)
+        elif player.bet > player.currency:
+            telegram_bot.send_message(message.chat.id,
+                                      f"Your bet is <b>NOT</b> accepted!\nYour bet must be less or equal than your "
+                                      f"balance!", parse_mode='html')
             return play(message)
         player.currency -= player.bet
 
@@ -438,7 +448,7 @@ def get_user_text(message):
                 result_of_game.blackjack(message.chat.id)
 
     else:
-        telegram_bot.send_message(message.chat.id, "Bet must be a number")
+        telegram_bot.send_message(message.chat.id, "Bet must be a natural number")
 
 
 telegram_bot.polling(none_stop=True)
