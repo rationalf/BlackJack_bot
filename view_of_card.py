@@ -1,4 +1,3 @@
-
 def view_of_card(rank, suit):
     if suit == "Clubs":
         if rank == 2:

@@ -40,19 +40,19 @@ class Player:
                 telegram_bot.send_message(message.chat.id, "Croupier don't take a card ")
 
     def get_currency_from_json(self):
-        with open('data.json', 'r') as file:
-            data = json.load(file)
+        with open('databaseForCurrencies.json', 'r') as file:
+            database = json.load(file)
         file.close()
-        if data.keys().__contains__(str(self.id)):
-            return data.get(str(self.id))
+        if database.keys().__contains__(str(self.id)):
+            return database.get(str(self.id))
         return 0
 
     def set_currency_for_player(self):
-        with open('data.json', 'r') as file:
-            data = json.load(file)
+        with open('databaseForCurrencies.json', 'r') as file:
+            database = json.load(file)
         file.close()
-        if data.keys().__contains__(str(self.id)):
-            data[str(self.id)] = self.currency
-        with open('data.json', 'w') as file:
-            json.dump(data, file, indent=4)
+        if database.keys().__contains__(str(self.id)):
+            database[str(self.id)] = self.currency
+        with open('databaseForCurrencies.json', 'w') as file:
+            json.dump(database, file, indent=4)
         file.close()

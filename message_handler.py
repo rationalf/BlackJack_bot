@@ -5,6 +5,7 @@ from Player import Player
 from telebot import types
 from get_player import get_player
 from ResultOfGame import ResultOfGame
+
 telegram_bot = telebot.TeleBot('6071571860:AAFch9-DHyN7EZ8zZUQRk5aM50u-ZD05cgs')
 
 
@@ -36,16 +37,16 @@ def start_command(message):
         nonlocal message
         key = message.from_user.id
         try:
-            with open('data.json', 'r') as file:
-                data = json.load(file)
+            with open('databaseForCurrencies.json', 'r') as file:
+                database = json.load(file)
         except FileNotFoundError:
-            data = {}
+            database = {}
         file.close()
-        if data.keys().__contains__(str(key)):
-            return data.get(str(key))
-        data[key] = 5000
-        with open('data.json', 'w') as file:
-            json.dump(data, file, indent=4)
+        if database.keys().__contains__(str(key)):
+            return database.get(str(key))
+        database[key] = 5000
+        with open('databaseForCurrencies.json', 'w') as file:
+            json.dump(database, file, indent=4)
         file.close()
         return 5000
 

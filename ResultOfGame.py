@@ -16,6 +16,7 @@ def resize_keyboard_decorator(func):
         telegram_bot.send_message(id_of_user, "To restart game, press the button",
                                   reply_markup=markup)
         return func(self, id_of_user, list_of_players)
+
     return wrapper
 
 
@@ -54,5 +55,3 @@ class ResultOfGame:
         telegram_bot.send_message(id_of_user, f'<b>You Lose! Croupier has a Blackjack</b>',
                                   parse_mode='html')
         get_player(id_of_user, list_of_players).set_currency_for_player()
-
-
