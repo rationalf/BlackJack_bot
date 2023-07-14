@@ -11,6 +11,7 @@ class Player:
         self.currency = self.get_currency_from_json()
         self.cards_on_hands = []
         self.index_of_card = 0
+        self.betIsEntered = False
         list_of_players.append(self)
 
     def counting_sum(self):
