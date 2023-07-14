@@ -1,6 +1,9 @@
-from Card import Card
+from Classes.Card import Card
 import random
-from view_of_card import view_of_card
+from functions.view_of_card import view_of_card
+import telebot
+
+telegram_bot = telebot.TeleBot('6071571860:AAFch9-DHyN7EZ8zZUQRk5aM50u-ZD05cgs')
 
 
 class Deck:
@@ -31,3 +34,13 @@ class Deck:
         card = view_of_card(rank, suit)
         user.index_of_card += 1
         return card
+
+    def initial_distribution_of_cards(self, message, player, croupier, deck):
+        player_card = deck.give_user_card(player)
+        telegram_bot.send_message(message.chat.id, "Your first cards are ")
+        telegram_bot.send_sticker(message.chat.id, str(player_card))
+        player_card = deck.give_user_card(player)
+        telegram_bot.send_sticker(message.chat.id, str(player_card))
+        croupier_card = deck.give_user_card(croupier)
+        telegram_bot.send_message(message.chat.id, "Croupier first card is ")
+        telegram_bot.send_sticker(message.chat.id, str(croupier_card))

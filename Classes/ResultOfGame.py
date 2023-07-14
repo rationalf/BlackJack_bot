@@ -1,6 +1,6 @@
 import telebot
 from telebot import types
-from get_player import get_player
+from functions.get_player import get_player
 
 telegram_bot = telebot.TeleBot('6071571860:AAFch9-DHyN7EZ8zZUQRk5aM50u-ZD05cgs')
 
@@ -55,3 +55,15 @@ class ResultOfGame:
         telegram_bot.send_message(id_of_user, f'<b>You Lose! Croupier has a Blackjack</b>',
                                   parse_mode='html')
         get_player(id_of_user, list_of_players).set_currency_for_player()
+
+    def define_result(self, message, player, croupier, deck, list_of_players):
+        player_sum = player.counting_sum()
+        if player_sum == 21:
+            croupier_sum = croupier.counting_sum()
+            croupier.croupier_choice(croupier_sum, deck, message)
+            if croupier_sum == 21:
+                player.currency += player.bet
+                self.draw(self, message.chat.id, list_of_players)
+            else:
+                player.currency += (player.bet * 15) // 10
+                self.blackjack(self, message.chat.id, list_of_players)
