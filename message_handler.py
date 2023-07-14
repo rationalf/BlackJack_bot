@@ -24,16 +24,25 @@ def rules_command(message):
     """command that represents the link on wiki page with Blackjack rules """
     link_to_rules = "https://en.wikipedia.org/wiki/Blackjack"
     markup = types.InlineKeyboardMarkup()
+    telegram_bot.send_message(message.chat.id,
+                              "1. The main objective of the game is to collect the nearest number <strong>less than or "
+                              "equal to 21</strong> and more than croupier.\n"
+                              "2. You have to bet at the start of the game.\n"
+                              "3. Then you will get two cards and will be able to see one of croupier's cards.\n"
+                              "4. After that choose either 'Hit' or 'Stand'\n"
+                              "4.a 'Hit' gives one more card for you.\n"
+                              "4.b 'Stand' means you don't take card from the deck for current game\n\n"
+                              "In one game four decks are involved\n"
+                              "For detailed and original rules use the link", parse_mode='html')
     markup.add(types.InlineKeyboardButton("Visit a website with rules of Blackjack", url=link_to_rules))
     telegram_bot.send_message(message.chat.id, 'Blackjack rules', reply_markup=markup)
-    help_command(message)
 
 
 @telegram_bot.message_handler(commands=['start'])
 def start_command(message):
     """command for greeting a new user"""
 
-    def add_dictionary_to_json():
+    def add_user_to_json():
         nonlocal message
         key = message.from_user.id
         try:
@@ -46,6 +55,7 @@ def start_command(message):
             return database.get(str(key))
         database[key] = 5000
         with open('databaseForCurrencies.json', 'w') as file:
+            print(key)
             json.dump(database, file, indent=4)
         file.close()
         return 5000
@@ -53,7 +63,7 @@ def start_command(message):
     user_name = message.from_user.username
     telegram_bot.send_message(message.chat.id, f'<b>Hi</b> {user_name}', parse_mode='html')
     help_command(message)
-    add_dictionary_to_json()
+    add_user_to_json()
 
 
 @telegram_bot.message_handler(commands=['play'])
@@ -76,7 +86,7 @@ def play_command(message, deck, list_of_players):
     if get_player(message.from_user.id, list_of_players).currency < 50:
         telegram_bot.send_message(message.chat.id, "Your balance is lower than minimum bet")
         message.text = 'Your balance - ' + str(get_player(message.from_user.id, list_of_players).currency)
-        get_user_text(message)
+        get_user_text(message, deck, list_of_players)
         return
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     balance_button = types.InlineKeyboardButton('Your balance - '
