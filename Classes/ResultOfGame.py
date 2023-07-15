@@ -16,19 +16,19 @@ def resize_keyboard_decorator(func):
         markup.add(restart_button, stop_button, balance_button)
         telegram_bot.send_message(id_of_user, "To restart game, press the button",
                                   reply_markup=markup)
+        get_player(id_of_user, list_of_players).set_currency_for_player()
+        get_player(id_of_user, list_of_players).cards_on_hands = []
         return func(self, id_of_user, list_of_players)
-
     return wrapper
 
 
 class ResultOfGame:
     @resize_keyboard_decorator
     def winner(self, id_of_user, list_of_players):
-        """Function for cungratulation with winning"""
+        """Function for congratulation with winning"""
         telegram_bot.send_message(id_of_user, "=========================")
         telegram_bot.send_message(id_of_user, "You Win!",
                                   parse_mode='html')
-        get_player(id_of_user, list_of_players).set_currency_for_player()
 
     @resize_keyboard_decorator
     def loser(self, id_of_user, list_of_players):
@@ -36,7 +36,6 @@ class ResultOfGame:
         telegram_bot.send_message(id_of_user, "=========================")
         telegram_bot.send_message(id_of_user, f'<b>You Lose!</b>',
                                   parse_mode='html')
-        get_player(id_of_user, list_of_players).set_currency_for_player()
 
     @resize_keyboard_decorator
     def draw(self, id_of_user, list_of_players):
@@ -44,7 +43,6 @@ class ResultOfGame:
         telegram_bot.send_message(id_of_user, "=========================")
         telegram_bot.send_message(id_of_user, f'<b>It is a draw!</b>',
                                   parse_mode='html')
-        get_player(id_of_user, list_of_players).set_currency_for_player()
 
     @resize_keyboard_decorator
     def blackjack(self, id_of_user, list_of_players):
@@ -52,7 +50,6 @@ class ResultOfGame:
         telegram_bot.send_message(id_of_user, "=========================")
         telegram_bot.send_message(id_of_user, f'<b>You Win! You have a Blackjack</b>',
                                   parse_mode='html')
-        get_player(id_of_user, list_of_players).set_currency_for_player()
 
     @resize_keyboard_decorator
     def blackjack_for_croupier(self, id_of_user, list_of_players):
@@ -60,7 +57,6 @@ class ResultOfGame:
         telegram_bot.send_message(id_of_user, "=========================")
         telegram_bot.send_message(id_of_user, f'<b>You Lose! Croupier has a Blackjack</b>',
                                   parse_mode='html')
-        get_player(id_of_user, list_of_players).set_currency_for_player()
 
     def define_result(self, message, player, croupier, deck, list_of_players):
         """Function for defining result of game"""
@@ -70,7 +66,7 @@ class ResultOfGame:
             croupier.croupier_choice(croupier_sum, deck, message)
             if croupier_sum == 21:
                 player.currency += player.bet
-                self.draw(self, message.chat.id, list_of_players)
+                self.draw(message.chat.id, list_of_players)
             else:
                 player.currency += (player.bet * 15) // 10
-                self.blackjack(self, message.chat.id, list_of_players)
+                self.blackjack(message.chat.id, list_of_players)
