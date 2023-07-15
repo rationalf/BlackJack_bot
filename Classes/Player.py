@@ -15,6 +15,7 @@ class Player:
         list_of_players.append(self)
 
     def counting_sum(self):
+        """Function for counting sum of card"""
         summ = 0
         for card in self.cards_on_hands:
             if int(card.rank) < 10:
@@ -30,6 +31,7 @@ class Player:
         return summ
 
     def croupier_choice(self, croupier_sum, deck, message):
+        """Function for giving croupier cards"""
         if self.id == str(message.from_user.id) + message.from_user.username:
             if croupier_sum <= 16:
                 croupier_card = deck.give_user_card(self)
@@ -41,6 +43,7 @@ class Player:
                 telegram_bot.send_message(message.chat.id, "Croupier don't take a card ")
 
     def get_currency_from_json(self):
+        """Function for taking currency from database"""
         with open('databaseForCurrencies.json', 'r') as file:
             database = json.load(file)
         file.close()
@@ -49,6 +52,7 @@ class Player:
         return 0
 
     def set_currency_for_player(self):
+        """Function of setting new currency"""
         with open('databaseForCurrencies.json', 'r') as file:
             database = json.load(file)
         file.close()

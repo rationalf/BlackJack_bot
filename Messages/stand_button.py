@@ -4,6 +4,7 @@ telegram_bot = telebot.TeleBot('6071571860:AAFch9-DHyN7EZ8zZUQRk5aM50u-ZD05cgs')
 
 
 def stand(message, deck, list_of_players, player, croupier, result_of_game):
+    """Function for ending game"""
     player_sum = player.counting_sum()
     croupier_sum = croupier.counting_sum()
     while croupier_sum <= 16:

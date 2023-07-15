@@ -1,5 +1,5 @@
 def view_of_card(rank, suit):
-    '''Function for making sticker from card'''
+    """Function for making sticker from card"""
     if suit == "Clubs":
         if rank == 2:
             return "CAACAgUAAxkBAAEJmx5kpebc_XlwoOaxJR7AXpOnMN9LjgAC7gADzD_AVUNl620pf85VLwQ"

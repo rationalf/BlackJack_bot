@@ -10,7 +10,7 @@ list_of_players = []
 
 @telegram_bot.message_handler()
 def game(message):
-    '''This function for starting game'''
+    """This function for starting game"""
     get_user_text(message, deck, list_of_players)
 
 

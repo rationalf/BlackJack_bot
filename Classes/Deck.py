@@ -27,6 +27,7 @@ class Deck:
         pass
 
     def give_user_card(self, user):
+        """Function for giving cards to user"""
         user.cards_on_hands.append(self.cards[self.index])
         self.index += 1
         rank = user.cards_on_hands[user.index_of_card].rank
@@ -36,6 +37,7 @@ class Deck:
         return card
 
     def initial_distribution_of_cards(self, message, player, croupier, deck):
+        """Function of initial distribution of card"""
         player_card = deck.give_user_card(player)
         telegram_bot.send_message(message.chat.id, "Your first cards are ")
         telegram_bot.send_sticker(message.chat.id, str(player_card))
