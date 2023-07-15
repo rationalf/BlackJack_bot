@@ -3,14 +3,16 @@
 
 ## Usage
 
-For our game you need go to [bot](https://t.me/blackjack_bot_bot) and use botton /start. 
+For our game you need go to telegram [bot](https://t.me/blackjack_bot_bot) and use botton /start. 
 
 ## Features list
 
+Every palyer has 5000 chips for bets. 
+For getting more chips use telegram for contacting with us.
 
 ## Project Installation
 
-You don't need installing our project. For working with project use [bot](https://t.me/blackjack_bot_bot)
+You don't need installing our project. For working with project use telegram [bot](https://t.me/blackjack_bot_bot)
 
 ## Frameworks and technologies used
 
