@@ -7,6 +7,7 @@ telegram_bot = telebot.TeleBot('6071571860:AAFch9-DHyN7EZ8zZUQRk5aM50u-ZD05cgs')
 
 
 def bet_handling(message, player, deck, list_of_players):
+    '''Function for bets'''
     player.bet = int(message.text)
 
     if player.bet < 50:
@@ -21,6 +22,7 @@ def bet_handling(message, player, deck, list_of_players):
 
 
 def resize_keyboard_start(message, player, list_of_players):
+    '''Function for buttons start'''
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     start_button = types.KeyboardButton('Start')
     markup.add(start_button)
@@ -31,6 +33,7 @@ def resize_keyboard_start(message, player, list_of_players):
 
 
 def resize_keyboard_hit_stand(message, list_of_players):
+    '''Function for buttons hit and stand'''
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     hit_button = types.KeyboardButton('Hit')
     stand_button = types.KeyboardButton('Stand')
