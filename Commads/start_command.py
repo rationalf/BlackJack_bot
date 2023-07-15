@@ -8,7 +8,7 @@ telegram_bot = telebot.TeleBot('6071571860:AAFch9-DHyN7EZ8zZUQRk5aM50u-ZD05cgs')
 
 @telegram_bot.message_handler(commands=['start'])
 def start_command(message):
-    """command for greeting a new user"""
+    """command for greeting a new user and adding him to database"""
 
     def add_user_to_json():
         nonlocal message
