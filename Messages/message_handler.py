@@ -68,7 +68,8 @@ def get_user_text(message, deck, list_of_players):
 
         player.betIsEntered = False
 
-        bet_handling.bet_handling(message, player, deck, list_of_players)
+        if bet_handling.bet_handling(message, player, list_of_players):
+            return
 
         bet_handling.resize_keyboard_hit_stand(message, list_of_players)
 

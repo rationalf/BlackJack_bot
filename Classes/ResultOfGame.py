@@ -27,7 +27,7 @@ class ResultOfGame:
     def winner(self, id_of_user, list_of_players):
         """Function for congratulation with winning"""
         telegram_bot.send_message(id_of_user, "=========================")
-        telegram_bot.send_message(id_of_user, "You Win!",
+        telegram_bot.send_message(id_of_user, f'<b>You Win!</b>',
                                   parse_mode='html')
 
     @resize_keyboard_decorator

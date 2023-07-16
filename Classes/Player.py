@@ -35,11 +35,9 @@ class Player:
         if self.id == str(message.from_user.id) + message.from_user.username:
             if croupier_sum <= 16:
                 croupier_card = deck.give_user_card(self)
-                telegram_bot.send_message(message.chat.id, "=========================")
                 telegram_bot.send_message(message.chat.id, "Croupier next card is ")
                 telegram_bot.send_sticker(message.chat.id, str(croupier_card))
             else:
-                telegram_bot.send_message(message.chat.id, "=========================")
                 telegram_bot.send_message(message.chat.id, "Croupier don't take a card ")
 
     def get_currency_from_json(self):
